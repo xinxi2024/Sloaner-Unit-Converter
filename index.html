@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sloaner Unit Converter</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2980b9;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 26px;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 12px;
+        }
+        
+        .logo:hover {
+            transform: scale(1.02);
+            background: rgba(52, 152, 219, 0.08);
+        }
+        
+        .logo svg {
+            margin-right: 12px;
+            filter: drop-shadow(0 2px 4px rgba(52, 152, 219, 0.2));
+            width: 42px;
+            height: 42px;
+            transition: filter 0.3s ease;
+        }
+        
+        .logo:hover svg {
+            filter: drop-shadow(0 4px 8px rgba(52, 152, 219, 0.3));
+        }
+        
+        .logo span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Segoe UI', sans-serif;
+            letter-spacing: 0.5px;
+            position: relative;
+            font-weight: 600;
+        }
+        
+        .logo span::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent,
+                var(--primary),
+                var(--secondary),
+                transparent
+            );
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            opacity: 0.7;
+        }
+        
+        .logo:hover span::after {
+            transform: scaleX(0.8);
+        }
+        
+        h1 {
+            color: var(--dark);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .converter-container {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .converter-tabs {
+            display: flex;
+            background-color: var(--light);
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background-color: white;
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .converter-content {
+            padding: 25px;
+        }
+        
+        .converter-panel {
+            display: none;
+        }
+        
+        .converter-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        
+        .input-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        select {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-left: 15px;
+            font-size: 16px;
+            background-color: white;
+            min-width: 120px;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .swap-btn {
+            background-color: var(--light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 10px auto;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .swap-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .formula {
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .formula code {
+            font-family: monospace;
+            color: var(--accent);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .converter-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .input-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            select {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="#" class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 外圆环 -->
+                    <circle cx="20" cy="20" r="18" stroke="url(#gradientStroke)" stroke-width="2.5"/>
+                    
+                    <!-- 左侧箭头 -->
+                    <path d="M12 16L16 12M16 12L20 16M16 12V22" 
+                          stroke="url(#gradient)" stroke-width="2.5" 
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    
+                    <!-- 右侧箭头 -->
+                    <path d="M28 24L24 28M24 28L20 24M24 28V18" 
+                          stroke="url(#gradient)" stroke-width="2.5" 
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    
+                    <!-- 中间的等号 -->
+                    <path d="M14 19H26" stroke="url(#gradient)" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M14 21H26" stroke="url(#gradient)" stroke-width="2.5" stroke-linecap="round"/>
+                    
+                    <defs>
+                        <linearGradient id="gradient" x1="8" y1="8" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#3498db"/>
+                            <stop offset="100%" stop-color="#2980b9"/>
+                        </linearGradient>
+                        <linearGradient id="gradientStroke" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#3498db"/>
+                            <stop offset="100%" stop-color="#2980b9"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span>Sloaner</span>
+            </a>
+        </header>
+
+        <h1>单位转换器</h1>
+
+        <div class="converter-container">
+            <div class="converter-tabs">
+                <div class="tab active" data-tab="length">长度</div>
+                <div class="tab" data-tab="weight">重量</div>
+                <div class="tab" data-tab="temperature">温度</div>
+                <div class="tab" data-tab="area">面积</div>
+                <div class="tab" data-tab="volume">体积</div>
+            </div>
+
+            <div class="converter-content">
+                <!-- Length Converter -->
+                <div class="converter-panel active" id="length">
+                    <div class="input-group">
+                        <div class="input-row">
+                            <input type="number" id="length-input-1" placeholder="输入数值">
+                            <select id="length-unit-1">
+                                <option value="m">米 (m)</option>
+                                <option value="km">千米 (km)</option>
+                                <option value="cm">厘米 (cm)</option>
+                                <option value="mm">毫米 (mm)</option>
+                                <option value="in">英寸 (in)</option>
+                                <option value="ft">英尺 (ft)</option>
+                                <option value="yd">码 (yd)</option>
+                                <option value="mi">英里 (mi)</option>
+                            </select>
+                        </div>
+                        
+                        <button class="swap-btn" onclick="swapUnits('length')">
+                            ⇅
+                        </button>
+                        
+                        <div class="input-row">
+                            <input type="number" id="length-input-2" placeholder="结果">
+                            <select id="length-unit-2">
+                                <option value="m">米 (m)</option>
+                                <option value="km">千米 (km)</option>
+                                <option value="cm" selected>厘米 (cm)</option>
+                                <option value="mm">毫米 (mm)</option>
+                                <option value="in">英寸 (in)</option>
+                                <option value="ft">英尺 (ft)</option>
+                                <option value="yd">码 (yd)</option>
+                                <option value="mi">英里 (mi)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="formula">
+                        <strong>转换公式:</strong> <span id="length-formula">1 米 = 100 厘米</span>
+                    </div>
+                </div>
+
+                <!-- Weight Converter -->
+                <div class="converter-panel" id="weight">
+                    <div class="input-group">
+                        <div class="input-row">
+                            <input type="number" id="weight-input-1" placeholder="输入数值">
+                            <select id="weight-unit-1">
+                                <option value="kg">千克 (kg)</option>
+                                <option value="g">克 (g)</option>
+                                <option value="mg">毫克 (mg)</option>
+                                <option value="lb">磅 (lb)</option>
+                                <option value="oz">盎司 (oz)</option>
+                                <option value="t">吨 (t)</option>
+                            </select>
+                        </div>
+                        
+                        <button class="swap-btn" onclick="swapUnits('weight')">
+                            ⇅
+                        </button>
+                        
+                        <div class="input-row">
+                            <input type="number" id="weight-input-2" placeholder="结果">
+                            <select id="weight-unit-2">
+                                <option value="kg">千克 (kg)</option>
+                                <option value="g" selected>克 (g)</option>
+                                <option value="mg">毫克 (mg)</option>
+                                <option value="lb">磅 (lb)</option>
+                                <option value="oz">盎司 (oz)</option>
+                                <option value="t">吨 (t)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="formula">
+                        <strong>转换公式:</strong> <span id="weight-formula">1 千克 = 1000 克</span>
+                    </div>
+                </div>
+
+                <!-- Temperature Converter -->
+                <div class="converter-panel" id="temperature">
+                    <div class="input-group">
+                        <div class="input-row">
+                            <input type="number" id="temp-input-1" placeholder="输入数值">
+                            <select id="temp-unit-1">
+                                <option value="c">摄氏度 (°C)</option>
+                                <option value="f">华氏度 (°F)</option>
+                                <option value="k">开尔文 (K)</option>
+                            </select>
+                        </div>
+                        
+                        <button class="swap-btn" onclick="swapUnits('temp')">
+                            ⇅
+                        </button>
+                        
+                        <div class="input-row">
+                            <input type="number" id="temp-input-2" placeholder="结果">
+                            <select id="temp-unit-2">
+                                <option value="c">摄氏度 (°C)</option>
+                                <option value="f" selected>华氏度 (°F)</option>
+                                <option value="k">开尔文 (K)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="formula">
+                        <strong>转换公式:</strong> <span id="temp-formula">°F = °C × 9/5 + 32</span>
+                    </div>
+                </div>
+
+                <!-- Area Converter -->
+                <div class="converter-panel" id="area">
+                    <div class="input-group">
+                        <div class="input-row">
+                            <input type="number" id="area-input-1" placeholder="输入数值">
+                            <select id="area-unit-1">
+                                <option value="m2">平方米 (m²)</option>
+                                <option value="km2">平方千米 (km²)</option>
+                                <option value="cm2">平方厘米 (cm²)</option>
+                                <option value="mm2">平方毫米 (mm²)</option>
+                                <option value="ha">公顷 (ha)</option>
+                                <option value="acre">英亩 (acre)</option>
+                                <option value="ft2">平方英尺 (ft²)</option>
+                                <option value="in2">平方英寸 (in²)</option>
+                            </select>
+                        </div>
+                        
+                        <button class="swap-btn" onclick="swapUnits('area')">
+                            ⇅
+                        </button>
+                        
+                        <div class="input-row">
+                            <input type="number" id="area-input-2" placeholder="结果">
+                            <select id="area-unit-2">
+                                <option value="m2">平方米 (m²)</option>
+                                <option value="km2">平方千米 (km²)</option>
+                                <option value="cm2" selected>平方厘米 (cm²)</option>
+                                <option value="mm2">平方毫米 (mm²)</option>
+                                <option value="ha">公顷 (ha)</option>
+                                <option value="acre">英亩 (acre)</option>
+                                <option value="ft2">平方英尺 (ft²)</option>
+                                <option value="in2">平方英寸 (in²)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="formula">
+                        <strong>转换公式:</strong> <span id="area-formula">1 平方米 = 10000 平方厘米</span>
+                    </div>
+                </div>
+
+                <!-- Volume Converter -->
+                <div class="converter-panel" id="volume">
+                    <div class="input-group">
+                        <div class="input-row">
+                            <input type="number" id="volume-input-1" placeholder="输入数值">
+                            <select id="volume-unit-1">
+                                <option value="m3">立方米 (m³)</option>
+                                <option value="l">升 (L)</option>
+                                <option value="ml">毫升 (mL)</option>
+                                <option value="gal">加仑 (gal)</option>
+                                <option value="qt">夸脱 (qt)</option>
+                                <option value="pt">品脱 (pt)</option>
+                                <option value="fl-oz">液量盎司 (fl oz)</option>
+                                <option value="ft3">立方英尺 (ft³)</option>
+                                <option value="in3">立方英寸 (in³)</option>
+                            </select>
+                        </div>
+                        
+                        <button class="swap-btn" onclick="swapUnits('volume')">
+                            ⇅
+                        </button>
+                        
+                        <div class="input-row">
+                            <input type="number" id="volume-input-2" placeholder="结果">
+                            <select id="volume-unit-2">
+                                <option value="m3">立方米 (m³)</option>
+                                <option value="l" selected>升 (L)</option>
+                                <option value="ml">毫升 (mL)</option>
+                                <option value="gal">加仑 (gal)</option>
+                                <option value="qt">夸脱 (qt)</option>
+                                <option value="pt">品脱 (pt)</option>
+                                <option value="fl-oz">液量盎司 (fl oz)</option>
+                                <option value="ft3">立方英尺 (ft³)</option>
+                                <option value="in3">立方英寸 (in³)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="formula">
+                        <strong>转换公式:</strong> <span id="volume-formula">1 立方米 = 1000 升</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 Sloaner 单位转换器 | 设计与开发</p>
+        </footer>
+    </div>
+
+    <script>
+        // Unit conversion factors to base units
+        const conversionFactors = {
+            // Length (base: meter)
+            length: {
+                m: 1,
+                km: 1000,
+                cm: 0.01,
+                mm: 0.001,
+                in: 0.0254,
+                ft: 0.3048,
+                yd: 0.9144,
+                mi: 1609.34
+            },
+            // Weight (base: kilogram)
+            weight: {
+                kg: 1,
+                g: 0.001,
+                mg: 0.000001,
+                lb: 0.453592,
+                oz: 0.0283495,
+                t: 1000
+            },
+            // Area (base: square meter)
+            area: {
+                m2: 1,
+                km2: 1000000,
+                cm2: 0.0001,
+                mm2: 0.000001,
+                ha: 10000,
+                acre: 4046.86,
+                ft2: 0.092903,
+                in2: 0.00064516
+            },
+            // Volume (base: cubic meter)
+            volume: {
+                m3: 1,
+                l: 0.001,
+                ml: 0.000001,
+                gal: 0.00378541,
+                qt: 0.000946353,
+                pt: 0.000473176,
+                'fl-oz': 0.0000295735,
+                ft3: 0.0283168,
+                in3: 0.0000163871
+            }
+        };
+
+        // Temperature requires special conversion formulas
+        function convertTemperature(value, fromUnit, toUnit) {
+            let celsius;
+            
+            // Convert to Celsius first
+            if (fromUnit === 'c') {
+                celsius = value;
+            } else if (fromUnit === 'f') {
+                celsius = (value - 32) * 5/9;
+            } else if (fromUnit === 'k') {
+                celsius = value - 273.15;
+            }
+            
+            // Convert from Celsius to target unit
+            if (toUnit === 'c') {
+                return celsius;
+            } else if (toUnit === 'f') {
+                return celsius * 9/5 + 32;
+            } else if (toUnit === 'k') {
+                return celsius + 273.15;
+            }
+        }
+
+        // Get temperature conversion formula
+        function getTemperatureFormula(fromUnit, toUnit) {
+            const unitNames = {
+                c: '°C',
+                f: '°F',
+                k: 'K'
+            };
+            
+            if (fromUnit === 'c' && toUnit === 'f') {
+                return '°F = °C × 9/5 + 32';
+            } else if (fromUnit === 'c' && toUnit === 'k') {
+                return 'K = °C + 273.15';
+            } else if (fromUnit === 'f' && toUnit === 'c') {
+                return '°C = (°F - 32) × 5/9';
+            } else if (fromUnit === 'f' && toUnit === 'k') {
+                return 'K = (°F - 32) × 5/9 + 273.15';
+            } else if (fromUnit === 'k' && toUnit === 'c') {
+                return '°C = K - 273.15';
+            } else if (fromUnit === 'k' && toUnit === 'f') {
+                return '°F = (K - 273.15) × 9/5 + 32';
+            } else {
+                return `${unitNames[fromUnit]} = ${unitNames[toUnit]}`;
+            }
+        }
+
+        // Generic unit conversion function
+        function convert(type, value, fromUnit, toUnit) {
+            if (type === 'temp') {
+                return convertTemperature(value, fromUnit, toUnit);
+            } else {
+                // For other conversions, convert to base unit then to target unit
+                const factors = conversionFactors[type];
+                const baseValue = value * factors[fromUnit];
+                return baseValue / factors[toUnit];
+            }
+        }
+
+        // Update formula text
+        function updateFormula(type, fromUnit, toUnit) {
+            let formulaElement;
+            let formulaText;
+            
+            if (type === 'temp') {
+                formulaElement = document.getElementById('temp-formula');
+                formulaText = getTemperatureFormula(fromUnit, toUnit);
+            } else {
+                const unitNames = {
+                    length: {
+                        m: '米', km: '千米', cm: '厘米', mm: '毫米',
+                        in: '英寸', ft: '英尺', yd: '码', mi: '英里'
+                    },
+                    weight: {
+                        kg: '千克', g: '克', mg: '毫克', lb: '磅', oz: '盎司', t: '吨'
+                    },
+                    area: {
+                        m2: '平方米', km2: '平方千米', cm2: '平方厘米', mm2: '平方毫米',
+                        ha: '公顷', acre: '英亩', ft2: '平方英尺', in2: '平方英寸'
+                    },
+                    volume: {
+                        m3: '立方米', l: '升', ml: '毫升', gal: '加仑',
+                        qt: '夸脱', pt: '品脱', 'fl-oz': '液量盎司',
+                        ft3: '立方英尺', in3: '立方英寸'
+                    }
+                };
+                
+                const factors = conversionFactors[type];
+                const conversionFactor = factors[toUnit] / factors[fromUnit];
+                
+                let fromName = unitNames[type][fromUnit];
+                let toName = unitNames[type][toUnit];
+                
+                if (conversionFactor < 0.000001 || conversionFactor > 1000000) {
+                    formulaText = `1 ${fromName} = ${conversionFactor.toExponential(4)} ${toName}`;
+                } else {
+                    formulaText = `1 ${fromName} = ${conversionFactor} ${toName}`;
+                }
+                
+                formulaElement = document.getElementById(`${type}-formula`);
+            }
+            
+            formulaElement.textContent = formulaText;
+        }
+
+        // Handle input changes
+        function handleInputChange(type, sourceInput) {
+            const input1 = document.getElementById(`${type}-input-1`);
+            const input2 = document.getElementById(`${type}-input-2`);
+            const unit1 = document.getElementById(`${type}-unit-1`).value;
+            const unit2 = document.getElementById(`${type}-unit-2`).value;
+            
+            // Update formula
+            updateFormula(type, unit1, unit2);
+            
+            if (sourceInput === 1) {
+                const value = parseFloat(input1.value);
+                if (!isNaN(value)) {
+                    const result = convert(type, value, unit1, unit2);
+                    input2.value = result.toFixed(6).replace(/\.?0+$/, '');
+                } else {
+                    input2.value = '';
+                }
+            } else {
+                const value = parseFloat(input2.value);
+                if (!isNaN(value)) {
+                    const result = convert(type, value, unit2, unit1);
+                    input1.value = result.toFixed(6).replace(/\.?0+$/, '');
+                } else {
+                    input1.value = '';
+                }
+            }
+        }
+
+        // Swap units
+        function swapUnits(type) {
+            const select1 = document.getElementById(`${type}-unit-1`);
+            const select2 = document.getElementById(`${type}-unit-2`);
+            const temp = select1.value;
+            
+            select1.value = select2.value;
+            select2.value = temp;
+            
+            handleInputChange(type, 1);
+        }
+
+        // Set up event listeners
+        window.onload = function() {
+            // Tab switching
+            const tabs = document.querySelectorAll('.tab');
+            const panels = document.querySelectorAll('.converter-panel');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.dataset.tab;
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update active panel
+                    panels.forEach(panel => panel.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Set up input event listeners for length
+            document.getElementById('length-input-1').addEventListener('input', () => handleInputChange('length', 1));
+            document.getElementById('length-input-2').addEventListener('input', () => handleInputChange('length', 2));
+            document.getElementById('length-unit-1').addEventListener('change', () => handleInputChange('length', 1));
+            document.getElementById('length-unit-2').addEventListener('change', () => handleInputChange('length', 1));
+            
+            // Set up input event listeners for weight
+            document.getElementById('weight-input-1').addEventListener('input', () => handleInputChange('weight', 1));
+            document.getElementById('weight-input-2').addEventListener('input', () => handleInputChange('weight', 2));
+            document.getElementById('weight-unit-1').addEventListener('change', () => handleInputChange('weight', 1));
+            document.getElementById('weight-unit-2').addEventListener('change', () => handleInputChange('weight', 1));
+            
+            // Set up input event listeners for temperature
+            document.getElementById('temp-input-1').addEventListener('input', () => handleInputChange('temp', 1));
+            document.getElementById('temp-input-2').addEventListener('input', () => handleInputChange('temp', 2));
+            document.getElementById('temp-unit-1').addEventListener('change', () => handleInputChange('temp', 1));
+            document.getElementById('temp-unit-2').addEventListener('change', () => handleInputChange('temp', 1));
+            
+            // Set up input event listeners for area
+            document.getElementById('area-input-1').addEventListener('input', () => handleInputChange('area', 1));
+            document.getElementById('area-input-2').addEventListener('input', () => handleInputChange('area', 2));
+            document.getElementById('area-unit-1').addEventListener('change', () => handleInputChange('area', 1));
+            document.getElementById('area-unit-2').addEventListener('change', () => handleInputChange('area', 1));
+            
+            // Set up input event listeners for volume
+            document.getElementById('volume-input-1').addEventListener('input', () => handleInputChange('volume', 1));
+            document.getElementById('volume-input-2').addEventListener('input', () => handleInputChange('volume', 2));
+            document.getElementById('volume-unit-1').addEventListener('change', () => handleInputChange('volume', 1));
+            document.getElementById('volume-unit-2').addEventListener('change', () => handleInputChange('volume', 1));
+            
+            // Initialize formulas
+            updateFormula('length', 'm', 'cm');
+            updateFormula('weight', 'kg', 'g');
+            updateFormula('temp', 'c', 'f');
+            updateFormula('area', 'm2', 'cm2');
+            updateFormula('volume', 'm3', 'l');
+        };
+    </script>
+</body>
+</html>
